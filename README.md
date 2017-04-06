@@ -9,3 +9,5 @@ Our project has the following objectives:
 - Build a framework where custom images can be imported.
 
 The project will presented in the form of a report, website, and presentation. 
+
+Website: https://github.com/dcusworth/image_spark_mpi
