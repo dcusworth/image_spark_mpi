@@ -26,7 +26,7 @@ The Figure shows lower runtimes for an increasing number of cores. The Figure be
 ![OpenMP-Speedups](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Speedup_OpenMP.png)
 
 ### OpenMP + MPI parallelization
-On top of the inner loop parallelization using OpenMP, we now implement MPI parallelization on the outer loop. 
+On top of the inner loop parallelization using OpenMP, we now implement MPI parallelization on the outer loop. This is implemented using the mpi4py package. We are currently working out some issues with the communication between the different nodes, benchmark results will be added shortly. The current associated Cython module is [train_ml_MPI.pyx](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Code/train_ml_MPI.pyx).
 
 ### Spark parallelization
 Spark allows a different method of parallelizing the learning algorithm. Using functional parallelism, Spark parallelizes using compositions of functions. We implement a Spark version of our code on the Amazon Web Services (AWS) EMR Spark cluster. We run our code with 1 master and 2 core nodes and validate that it gives the same results as the serial implementation. The resulting speedup compared to running the serial Odyssey code is shown in the figure below.
