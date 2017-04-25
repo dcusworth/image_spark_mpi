@@ -1,0 +1,1 @@
+validation accuracy = 0.834170854271best lambda = 7742.63682681elapsed time for 1000 samples = 19.7954921722validation accuracy = 0.856753069577best lambda = 599.484250319elapsed time for 11000 samples = 57.2940330505

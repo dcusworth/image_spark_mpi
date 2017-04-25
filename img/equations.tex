@@ -1,0 +1,132 @@
+\documentclass[article,12pt]{article}
+\usepackage[left=1in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{subfigure}
+\usepackage{fleqn}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{ctable}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{url}
+\usepackage[absolute]{textpos}
+\usepackage{footnote}
+\usepackage[font={small}]{caption}
+\usepackage{afterpage}
+\usepackage[pagewise]{lineno}
+\usepackage{sectsty}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage{etoolbox}
+\usepackage{bm}
+%\usepackage{pslatex}
+%\usepackage[parfill]{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[labelfont=bf]{caption}
+\usepackage{cite}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{bm}
+\usepackage{listings}
+
+%Listings settings
+\usepackage{color}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\ind}{index}
+
+%Bibliography settings
+\usepackage{natbib}
+\setlength{\bibsep}{0pt plus 0.3ex}
+\setcitestyle{authoryear,open={[},close={]}}
+
+% Set up header
+\pagestyle{fancy}
+\lhead{\textbf{CS 205: Project Equations}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Document settings
+\hyphenpenalty 10000
+\exhyphenpenalty 10000
+\sloppy
+\titlespacing{\section}{0pt}{5pt}{5pt}
+\setlength{\belowcaptionskip}{-20pt}
+\setlength\parindent{0pt}
+
+%Make norm function
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Start Document
+\begin{document}
+
+Learning algorithm:
+
+$$ \argmin_{w} \left\{ \frac{1}{N} \sum_{i=1}^N (\langle w, x_i \rangle  - y_i)^2 + \lambda || w ||_2^2 \right\}$$
+$$ x_i, w \in \mathbb{R}^d, \lambda \in \mathbb{R}, y_i \in \{-1, 1\}$$
+
+Analytical solution to the problem:
+
+$$ w^* = \left(X^TX + \lambda I_d\right)^{-1} X^T Y$$
+$$ w^* = \frac{ \sum_{i=1}^N x_i^{T}y_i}{\sum_{i=1}^N x_ix_i^T + N\lambda}$$
+
+Generating a prediction in the binary case due to Bayes Decision Rule:
+$$ \hat{y_i} = \sign(\langle x_i, w^* \rangle)$$
+
+
+Multi-class: $k$ is the number of classes
+
+For $j \in [1, k]$:
+
+Solve 
+$$ \argmin_{w_j} \left\{ \frac{1}{N} \sum_{i=1}^N (\langle w_j, x_i \rangle  - y_i^k)^2 + \lambda || w ||_2^2 \right\}$$\\
+
+$\hat{y_i} = \ind \left(\argmax \{ \langle x_i,w_1^* \rangle, \cdots, \langle x_i,w_j^*\rangle, \cdots, \langle x_i,w_k^*\rangle\}\right)$
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
