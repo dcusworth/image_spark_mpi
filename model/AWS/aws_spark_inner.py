@@ -2,12 +2,15 @@ import numpy as np
 import time
 import random
 
+import findspark
+findspark.init() 
+
 import pyspark
 sc = pyspark.SparkContext()
 
 
 ########### MAKE DATA SELECTION ###########
-which_data = 'MNIST'
+which_data = 'OWN'
 ###########################################
 
 ###Choosing to use MNIST dataset
@@ -34,7 +37,7 @@ elif which_data == 'OWN':
     
     #Read 6 classes
     for fingers in np.arange(6):
-        list_images = glob.glob("Own_Data/class_"+str(fingers)+"/*.png")
+        list_images = glob.glob("/Volumes/TRANSCEND/CS205/class_"+str(fingers)+"/*.png")
         
         for i in np.arange(len(list_images)):
             #Read image
@@ -81,7 +84,8 @@ def label_func(x, choose_label):
         return -1
 
 #Iterate over different sizes of the training set
-for N in range(1000, 60000, 10000):
+#for N in range(1000, 60000, 10000):
+for N in [1000, 11000]:
 
     start = time.time()
 
@@ -165,7 +169,7 @@ for N in range(1000, 60000, 10000):
 
 
     best_val = np.where(vaccs == np.max(vaccs))[0][0]
-    with open('spark_inner.txt', 'a') as myfile:
+    with open('spark_inner_own.txt', 'a') as myfile:
         myfile.write('validation accuracy = ' + str(vaccs[best_val]))
         myfile.write('best lambda = ' + str(lambdas[best_val]))
         myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start))
