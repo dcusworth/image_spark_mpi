@@ -53,7 +53,7 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" style="width: 150px;"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="300"/>
 <figcaption> Figure 2: Computation graph for model parallelism. </figcaption>
 </figure>
 
