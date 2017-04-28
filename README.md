@@ -7,15 +7,43 @@ Image recognition is an old subject in artificial intelligence, which has recent
 Our project is to apply statistical learning theory in the MPI, OpenMP, and Spark frameworks to classify images. We further perform parallal hybridization of OpenMP and MPI. We develop three parallel algorithm frameworks, 1) model parallelism MPI + OpenMP, 2) data parallelism MPI + OpenMP, and 3) model parallelism Spark. 
 
 ### Learning algorithm
+Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where more weights are fit with a nonlinear activation function. Thus solving the problem requires numerical optimization (e.g., stochastic gradient descent). For this pro
+
 We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The learning algorithm is known as Regularized Linear Least Squares or Ridge Regression [(Tibshirani, 1996)].
 
 
 The solution to the fitted "weights" or coefficients can be solved analytically:
 
 
-Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where more weights are fit with a nonlinear activation function. Thus solving the problem requires numerical optimization (e.g., stochastic gradient descent). For this pro
+For a multiclass classification of k labels, we need to solve for the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
-The current implementation uses the MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9). The database includes a training set of 60,000 and a test set of 10,000 each consisting of 28 by 28 pixels. Each pixel has a value between 0 and 255 (white to black). If time permits, we are planning to expand our model to import our own images (see 'Future Work'). 
+
+Following Bayes Decision Rule, we arrive at a prediction of being in or outside class k by solving y_pred = sign (Xw). To determine the class of an image over all classes, we solve y_class = max(Xw_1, ... , Xw_k).
+
+We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9) (Figure 1). The database includes a training set of 60,000 and a test set of 10,000 each consisting of 28 by 28 pixels. Each pixel has a value between 0 and 255 (white to black).
+
+We also implement a classifier of images we took ourselves of hands (Figure 1), which digits of 0-5. 
+
+
+### Computation Graph
+We translate our learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
+
+![dag1](img/dag_1.png')
+
+Model Parallelism MPI + OpenMP: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using OpenMP in Cython.
+
+Spark inner-loop: We perform the innermost matrix multiplications using Spark by looping over each lambda and label, and treating the pseudo-inverse as an RDD, and multiplying it with X^TY.  
+
+Spark outer-loop: We treat each lambda as an RDD, then send to the workers a lambda and the broadcasted X feature training set. This parallelizes the calculation of the pseudo-inverse. 
+
+
+We can think of parallelism in a data framework as well (Figure 3).
+
+![dag2](img/dag_2.png)
+
+Data Parallelism MPI + OpenMPI. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
+
+
 
 ### Serial implementation
 We first benchmark the serial implementation on Odyssey for different problem sizes. The code used for this is included in [Code_Serial.py](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Code/Code_Serial.py). As shown in the Figure below, we find that runtime scales linearly with the number of samples studied. The model reaches above 70% accuracy for the larger training sets. 
