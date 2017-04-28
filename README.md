@@ -9,20 +9,33 @@ Our project is to apply statistical learning theory in the MPI, OpenMP, and Spar
 ### Learning algorithm
 Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where more weights are fit with a nonlinear activation function. Thus solving the problem requires numerical optimization (e.g., stochastic gradient descent). For this pro
 
-We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The learning algorithm is known as Regularized Linear Least Squares or Ridge Regression [(Tibshirani, 1996)].
+We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The learning algorithm is known as Regularized Linear Least Squares or Ridge Regression [(Tibshirani, 1996)](https://statweb.stanford.edu/~tibs/lasso/lasso.pdf).
 
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn1.png" alt="eqn1" style="width: 150px;"/>
 
-The solution to the fitted "weights" or coefficients can be solved analytically:
+Each row of X represents the pixels of an image. Each value of Y is the corresponding label of that image. The solution to the fitted "weights" or coefficients can be solved analytically:
 
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" style="width: 150px;"/>
+
+Where the pseudo-interve is definted as 
+
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" style="width: 150px;"/>
 
 For a multiclass classification of k labels, we need to solve for the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
+Following Bayes Decision Rule, we arrive at a prediction of being in or outside class k by looking at the sign of the prediction <X, w>. We decide the prediction among classes by solving the following:
 
-Following Bayes Decision Rule, we arrive at a prediction of being in or outside class k by solving y_pred = sign (Xw). To determine the class of an image over all classes, we solve y_class = max(Xw_1, ... , Xw_k).
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn4.png" alt="eqn4" style="width: 150px;"/>
 
+
+ 
 We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9) (Figure 1). The database includes a training set of 60,000 and a test set of 10,000 each consisting of 28 by 28 pixels. Each pixel has a value between 0 and 255 (white to black).
 
 We also implement a classifier of images we took ourselves of hands (Figure 1), which digits of 0-5. 
+
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" style="width: 150px;"/>
+
+
 
 
 ### Computation Graph
@@ -32,18 +45,18 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" style="width: 150px;"/>
 
 
-Model Parallelism MPI + OpenMP: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using OpenMP in Cython.
+*Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using OpenMP in Cython.
 
-Spark inner-loop: We perform the innermost matrix multiplications using Spark by looping over each lambda and label, and treating the pseudo-inverse as an RDD, and multiplying it with X^TY.  
+*Spark inner-loop*: We perform the innermost matrix multiplications using Spark by looping over each lambda and label, and treating the pseudo-inverse as an RDD, and multiplying it with X^TY.  
 
-Spark outer-loop: We treat each lambda as an RDD, then send to the workers a lambda and the broadcasted X feature training set. This parallelizes the calculation of the pseudo-inverse. 
+*Spark outer-loop*: We treat each lambda as an RDD, then send to the workers a lambda and the broadcasted X feature training set. This parallelizes the calculation of the pseudo-inverse. 
 
 
 We can think of parallelism in a data framework as well (Figure 3).
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" style="width: 300px;"/>
 
-Data Parallelism MPI + OpenMPI. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
+*Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
 
 
 
