@@ -12,28 +12,32 @@ which_data = 'MNIST'
 
 ###Choosing to use MNIST dataset
 if which_data == 'MNIST':
-
+    
     import mnist
     images = mnist.train_images()
     labels = mnist.train_labels()
+    
+    #from mnist import MNIST
+    #mndata = MNIST('/Users/dcusworth/Desktop/mnist/MNIST/python-mnist/data')
+    #images, labels = mndata.load_training()
 
     d = 784 #Pixels of MNIST data
 
+
 ###Choosing to use our own images
 elif which_data == 'OWN':
-
-
+    
     #Reading own images
     import matplotlib.image as mpimg
     import glob
-
+    
     #Initialize lists
     images_in = []
     labels_in = []
-
+    
     #Read 6 classes
     for fingers in np.arange(6):
-        list_images = glob.glob("Own_Data/class_"+str(fingers)+"/*.png")
+        list_images = glob.glob("/Volumes/TRANSCEND/CS205/class_"+str(fingers)+"/*.png")
         
         for i in np.arange(len(list_images)):
             #Read image
@@ -52,13 +56,11 @@ elif which_data == 'OWN':
             #Add label to the list
             labels_in.append(fingers)
 
-    #Shuffle (cause we're reading in order, that messes up selection below)
-    #We can remove this if we're using the entire database
-
+    #Shuffle
     #Initialize lists
     images = []
     labels = []
-
+    
     #Shuffle
     index_shuf = range(len(labels_in))
     random.shuffle(index_shuf)
@@ -78,11 +80,11 @@ def label_func(x, choose_label):
         return 1
     else:
         return -1
+    
 
 #Iterate over different sizes of the training set
 for N in range(1000, 60000, 10000):
 
-    start = time.time()
 
     #Retrieve data and labels - do preprocessing
     y_labs = labels[0:N]
@@ -121,6 +123,7 @@ for N in range(1000, 60000, 10000):
     y_val = sc.parallelize(list(enumerate(y_labs))).filter(lambda x: x[0] in vind).map(lambda x: x[1]).collect()
     tpoints = sc.parallelize(zip(ytrain, xtb.value))
 
+    start = time.time()
 
     #Get pseudo-inverse
     pseudo_inv = sc.parallelize(zip(lambdas, [np.asarray(xtb.value)] * len(lambdas)))\
@@ -160,10 +163,10 @@ for N in range(1000, 60000, 10000):
         
     end = time.time()
 
-    with open('spark_outer.txt', 'a') as myfile:
-        myfile.write('validation accuracy = ' + str(best_sol[1]))
-        myfile.write('best lambda = ' + str(best_sol[0]))
-        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start))
+    with open('spark_' + which_data + 'outer.txt', 'a') as myfile:
+        myfile.write('validation accuracy = ' + str(best_sol[1]) + '\n')
+        myfile.write('best lambda = ' + str(best_sol[0]) + '\n')
+        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start) + '\n')
 
 
 

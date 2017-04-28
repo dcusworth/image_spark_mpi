@@ -2,10 +2,6 @@ import numpy as np
 import time
 import random
 
-#Reading own images
-import matplotlib.image as mpimg
-import glob
-
 ########### MAKE DATA SELECTION ###########
 which_data = 'MNIST'
 ###########################################
@@ -115,13 +111,13 @@ for N in range(1000, 60000, 10000):
 
     Xtr = x_c[0:tint]
     Xvl = x_c[tint:-1]
-    #y_val = [yy for idx,yy in enumerate(y_labs) if idx in vind]
-    #y_tr = [yy for idx,yy in enumerate(y_labs) if idx in tind]
     y_val = y_labs[tint:-1]
     y_tr = y_labs[0:tint]
+    
+    Nt = Xtr.shape[0]
+    Mt = Xtr.shape[1]
 
     for ll in lambdas:
-            #print(ll)
 
             ws = []
             iouts = []
@@ -130,36 +126,31 @@ for N in range(1000, 60000, 10000):
             #Loop over all labels
             for choose_label in range(6): 
 
-                    y_tr_map = [label_func(q, choose_label) for q in y_tr]
-                    Nt = Xtr.shape[0]
-                    Mt = Xtr.shape[1]
+                y_tr_map = [label_func(q, choose_label) for q in y_tr]
+
+                numer_sum = np.zeros(Mt)
+                for i in range(Nt):
+                    x_iT = Xtr[i,:]
+                    inumer = x_iT * y_tr_map[i]
+                    numer_sum += inumer
+
+                iw = np.zeros(Mt)
+                for i in range(Mt):
+                    for j in range(Mt):
+                        iw[i] += denom_sum[i][j] * numer_sum[j]
 
 
-                    #Translate np.dots to for loops
-                    #Can parallelize with pranges in Cython
-                    numer_sum = np.zeros(Mt)
-                    for i in range(Nt):
-                            x_iT = Xtr[i,:]
-                            inumer = x_iT * y_tr_map[i]
-                            numer_sum += inumer
+                iout = np.zeros(V)
+                for i in range(V):
+                    for j in range(Mt):
+                        iout[i] += Xvl[i][j] * iw[j]
 
-                    denom_sum = Nt*ll
-                    for i in range(Nt):
-                            x_iT = Xtr[i,:]
-                            idenom = 0
-                            for j in range(Mt):
-                                    idenom += x_iT[j] * x_iT[j]
-                            denom_sum += idenom
+                iclass = [np.sign(q) for q in iout]
 
-                    iw = numer_sum / float(denom_sum)
-                    iout = np.dot(Xvl, iw)
-                    iclass = [np.sign(q) for q in iout]
-
-                    #print('iout[0]',iout[0])
-                    #Append to output
-                    ws.append(iw)
-                    iouts.append(iout)
-                    classes.append(iclass)
+                #Append to output
+                ws.append(iw)
+                iouts.append(iout)
+                classes.append(iclass)
 
             #Figure out how to spark-ify this loop
             out_pred = list(zip(*iouts))
@@ -179,8 +170,8 @@ for N in range(1000, 60000, 10000):
     end = time.time()
 
     best_val = np.where(vaccs == np.max(vaccs))[0][0]
-    with open('serial.txt', 'a') as myfile:
-        myfile.write('validation accuracy = ' + str(vaccs[best_val]))
-        myfile.write('best lambda = ' + str(lambdas[best_val]))
-        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start))
+    with open('serial_' + which_data + '.txt', 'a') as myfile:
+        myfile.write('validation accuracy = ' + str(vaccs[best_val]) + '\n')
+        myfile.write('best lambda = ' + str(lambdas[best_val]) + '\n')
+        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start) + '\n')
 

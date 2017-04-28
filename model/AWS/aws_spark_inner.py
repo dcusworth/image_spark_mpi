@@ -2,15 +2,15 @@ import numpy as np
 import time
 import random
 
-import findspark
-findspark.init() 
+#import findspark
+#findspark.init() 
 
 import pyspark
 sc = pyspark.SparkContext()
 
 
 ########### MAKE DATA SELECTION ###########
-which_data = 'OWN'
+which_data = 'MNIST'
 ###########################################
 
 ###Choosing to use MNIST dataset
@@ -19,6 +19,10 @@ if which_data == 'MNIST':
     import mnist
     images = mnist.train_images()
     labels = mnist.train_labels()
+    
+    #from mnist import MNIST
+    #mndata = MNIST('/Users/dcusworth/Desktop/mnist/MNIST/python-mnist/data')
+    #images, labels = mndata.load_training()
 
     d = 784 #Pixels of MNIST data
 
@@ -56,9 +60,7 @@ elif which_data == 'OWN':
             #Add label to the list
             labels_in.append(fingers)
 
-    #Shuffle (cause we're reading in order, that messes up selection below)
-    #We can remove this if we're using the entire database
-
+    #Shuffle
     #Initialize lists
     images = []
     labels = []
@@ -82,12 +84,11 @@ def label_func(x, choose_label):
         return 1
     else:
         return -1
+    
 
 #Iterate over different sizes of the training set
-#for N in range(1000, 60000, 10000):
-for N in [1000, 11000]:
+for N in range(1000, 60000, 10000):
 
-    start = time.time()
 
     #Retrieve data and labels - do preprocessing
     y_labs = labels[0:N]
@@ -117,6 +118,7 @@ for N in [1000, 11000]:
     #Create Spark context for feature matrix
     x_t = sc.parallelize(list(enumerate(x_c))).filter(lambda x: x[0] in tind).map(lambda x: x[1])
     xtb = sc.broadcast(x_t.collect())
+    X = np.asarray(xtb.value)
     x_v = sc.parallelize(list(enumerate(x_c))).filter(lambda x: x[0] in vind).map(lambda x: x[1])
     xvb = sc.broadcast(x_v.collect())
 
@@ -126,15 +128,15 @@ for N in [1000, 11000]:
     tpoints = sc.parallelize(zip(ytrain, xtb.value))
 
 
+    start = time.time()
     for ll in lambdas:
 
         ws = []
         iouts = []
         classes = []
-        
+
         #Get denominator - depends on lambda/regularization and not label
-        denom_map = x_t.map(lambda x: np.dot(x, x.T) + N*ll) 
-        denom_sum = denom_map.reduce(lambda x,y: x+y) 
+        denom_sum = np.linalg.inv(np.dot(X.T, X) + np.eye(d)*ll)
 
         ### Loop over all labels
         for choose_label in range(10): 
@@ -143,7 +145,9 @@ for N in [1000, 11000]:
             numer_sum = tpoints.map(lambda x:x[1] * (label_func(x[0],choose_label))).reduce(lambda x,y: x+y)
 
             #Use previously computed denominator to get fitted weights 
-            iw = numer_sum / float(denom_sum)
+            iw = sc.parallelize(denom_sum)\
+                    .map(lambda x: np.dot(x, numer_sum))\
+                    .collect()
 
             #Test on validation set
             ires = x_v.map(lambda x:np.dot(x,iw))
@@ -158,7 +162,7 @@ for N in [1000, 11000]:
         #Collect all digit predictions
         out_pred = zip(*iouts)
         ipred = sc.parallelize(zip(*iouts)).map(lambda x: np.argmax(x)).collect()
-        
+
         #Determine accuracy on validation
         vacc = np.sum([y == p for y,p in zip(y_val, ipred)]) / float(len(ipred))
 
@@ -169,13 +173,8 @@ for N in [1000, 11000]:
 
 
     best_val = np.where(vaccs == np.max(vaccs))[0][0]
-    with open('spark_inner_own.txt', 'a') as myfile:
-        myfile.write('validation accuracy = ' + str(vaccs[best_val]))
-        myfile.write('best lambda = ' + str(lambdas[best_val]))
-        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start))
-
-
-
-
-
+    with open('spark_' + which_data + 'inner.txt', 'a') as myfile:
+        myfile.write('validation accuracy = ' + str(vaccs[best_val]) + '\n')
+        myfile.write('best lambda = ' + str(lambdas[best_val]) + '\n')
+        myfile.write('elapsed time for ' + str(N) + ' samples = ' + str(end-start) + '\n')
 
