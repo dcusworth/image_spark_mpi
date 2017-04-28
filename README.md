@@ -11,21 +11,29 @@ Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where m
 
 We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The learning algorithm is known as Regularized Linear Least Squares or Ridge Regression [(Tibshirani, 1996)](https://statweb.stanford.edu/~tibs/lasso/lasso.pdf).
 
+<center>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn1.png" alt="eqn1" style="width: 150px;"/>
+</center>
 
 Each row of X represents the pixels of an image. Each value of Y is the corresponding label of that image. The solution to the fitted "weights" or coefficients can be solved analytically:
 
+<center>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" style="width: 150px;"/>
+</center>
 
 Where the pseudo-interve is definted as 
 
+<center>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" style="width: 150px;"/>
+</center>
 
 For a multiclass classification of k labels, we need to solve for the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
 Following Bayes Decision Rule, we arrive at a prediction of being in or outside class k by looking at the sign of the prediction <X, w>. We decide the prediction among classes by solving the following:
 
+<center>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn4.png" alt="eqn4" style="width: 150px;"/>
+</center>
 
 
  
@@ -33,7 +41,9 @@ We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)
 
 We also implement a classifier of images we took ourselves of hands (Figure 1), which digits of 0-5. 
 
+<center>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" style="width: 150px;"/>
+</center>
 
 
 
