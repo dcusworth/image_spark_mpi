@@ -1,15 +1,21 @@
 # Parallelized Image Recognition in Spark + MPI
-## CS205 - Interim progress report
+## CS205 - Final Report
+## Tim Clements, Daniel Cusworth, Joannes (Bram) Maasakkers
 
-Image recognition is a hot topic in machine learning. It has a lot of applications including in self-driving vehicles that have to identify different objects on the road and respond based on their location and movement. Our project is to apply statistical learning theory in the OpenMP and Spark frameworks to classify images. We further aim to optimize the training of our learning algorithm by implementing MPI parallelization. We will explore both model and data parallelization as many examples of labeled images are critical to training an accurate model.
+Image recognition is an old subject in artificial intelligence, which has recently been subject to intense development thanks to computational advances. Private industry has developed a variety of multi-layered image recognition processors algorithms (e.g., AlexNet, GoogleNet) and software (e.g., TensorFlow, Caffe) to classify arbitrary images into categories. These advances have applications in facial recognition, self-driving automobiles, and social media (to name just a few). However, training large batches of images for classification is still a computationally intensive process and the predictive ability of an image recognition framework improves with the number of ingested samples.
 
-### Project Goals
-- Implement both serial, OpenMPI+MPI, and Spark regularized statistical learning algorithms. This will initially take the form of a linear classifier (e.g. 1-layer neural network) with L-2 loss.
-- Analyze and benchmark data vs. model parallelization approaches. Weigh the benefits of computation cost vs. testing accuracy.
-- Build a framework where custom images can be imported.
+Our project is to apply statistical learning theory in the MPI, OpenMP, and Spark frameworks to classify images. We further perform parallal hybridization of OpenMP and MPI. We develop three parallel algorithm frameworks, 1) model parallelism MPI + OpenMP, 2) data parallelism MPI + OpenMP, and 3) model parallelism Spark. 
 
 ### Learning algorithm
-We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The current implementation uses the MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9). The database includes a training set of 60,000 and a test set of 10,000 each consisting of 28 by 28 pixels. Each pixel has a value between 0 and 255 (white to black). If time permits, we are planning to expand our model to import our own images (see 'Future Work'). 
+We implement a multi-class linear classifier (one hidden layer neutral network) to perform a training, validation, and testing split on the data. The learning algorithm is known as Regularized Linear Least Squares or Ridge Regression [(Tibshirani, 1996)].
+
+
+The solution to the fitted "weights" or coefficients can be solved analytically:
+
+
+Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where more weights are fit with a nonlinear activation function. Thus solving the problem requires numerical optimization (e.g., stochastic gradient descent). For this pro
+
+The current implementation uses the MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9). The database includes a training set of 60,000 and a test set of 10,000 each consisting of 28 by 28 pixels. Each pixel has a value between 0 and 255 (white to black). If time permits, we are planning to expand our model to import our own images (see 'Future Work'). 
 
 ### Serial implementation
 We first benchmark the serial implementation on Odyssey for different problem sizes. The code used for this is included in [Code_Serial.py](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Code/Code_Serial.py). As shown in the Figure below, we find that runtime scales linearly with the number of samples studied. The model reaches above 70% accuracy for the larger training sets. 
