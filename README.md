@@ -48,12 +48,14 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
 
 
 
-### Computation Graph
+### Computation Graphs
 We translate our learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
 
 
+<figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" style="width: 150px;"/>
-
+<figcaption> Figure 2: Computation graph for model parallelism. </figcaption>
+</figure>
 
 *Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using OpenMP in Cython.
 
@@ -64,7 +66,10 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 
 We can think of parallelism in a data framework as well (Figure 3).
 
+<figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" style="width: 300px;"/>
+<figcaption> Figure 3: Computation graph for data parallelism. </figcaption>
+</figure>
 
 *Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
 
@@ -88,11 +93,15 @@ The Figure shows lower runtimes for an increasing number of cores. The Figure be
 On top of the inner loop parallelization using OpenMP, we now implement MPI parallelization on the outer loop. This is implemented using the mpi4py package. We are currently working out some issues with the communication between the different nodes, benchmark results will be added shortly. The current associated Cython module is [train_ml_MPI.pyx](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Code/train_ml_MPI.pyx).
 
 ### Spark parallelization
-Spark allows a different method of parallelizing the learning algorithm. Using functional parallelism, Spark parallelizes using compositions of functions. We implement a Spark version of our code on the Amazon Web Services (AWS) EMR Spark cluster. We run our code with 1 master and 2 core nodes and validate that it gives the same results as the serial implementation. The resulting speedup compared to running the serial Odyssey code is shown in the figure below.
+We implement a Spark version of our code on an Amazon Web Services (AWS) EMR cluster (m2xlarge) using 1 master and 4 worker cores. Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop implementation matches nicely with the model parallel results of MPI+OpenMP. 
+ 
+<figure>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" style="width: 300px;"/>
+<figcaption> Figure 3: Computation graph for data parallelism. </figcaption>
+</figure>
 
-![Spark-Speedups](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Speedup_Spark.png)
+We were only able to run for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
 
-We find speedup larger than 1 for all problem sizes studied. More work will be done on applying Spark to the loop over the Tikhonov regularization factors and benchmarking it for varying hardware setups on AWS. The Spark version of the code is [Code_Spark.py](https://github.com/jdmaasakkers/cs205_prelimreport/blob/master/Code/Code_Spark.py). Python code used for all the plots is included in the code directory. 
 
 ### Future work
 We will continue work along three different avenues:
