@@ -41,10 +41,10 @@ We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)
 
 We also implement a classifier of images we took ourselves of hands (Figure 1), which digits of 0-5. 
 
-<center>
+<figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" style="width: 150px;"/>
-</center>
-
+<figcaption> Figure 1: Datasets used in this study. </figcaption>
+</figure>
 
 
 
