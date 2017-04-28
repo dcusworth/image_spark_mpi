@@ -29,7 +29,7 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
 We translate our learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
 
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" style="width: 300px;"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" style="width: 150px;"/>
 
 
 Model Parallelism MPI + OpenMP: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using OpenMP in Cython.
