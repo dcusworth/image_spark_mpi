@@ -100,6 +100,7 @@ We implement a Spark version of our code on an Amazon Web Services (AWS) EMR clu
 <figcaption> Figure 3: Computation graph for data parallelism. </figcaption>
 </figure>
 
+
 We were only able to run for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
 
 
