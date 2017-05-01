@@ -99,7 +99,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 </figure>
 <br />   
 
-*Hybrid OpenMP + MPI - Model Parallelism*
+**Hybrid OpenMP + MPI - Model Parallelism**
 
 Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes. We also note that from our serial benchmarks, the overhead involved when increasing the number N images does not scale as a function of images, i.e. Time(serial) = 0.004 N^1.004 + 5.
 
@@ -109,7 +109,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 </figure>
 <br />   
 
-*Hybrid OpenMP + MPI - Data Parallelism*
+**Hybrid OpenMP + MPI - Data Parallelism**
 
 Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Like with the model parallel framework, we see maximum speeup for the maximum number of threads and nodes requested. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
@@ -119,7 +119,7 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 </figure>
 <br />   
 
-*Spark parallelization*
+**Spark parallelization**
  Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
  
 <figure>
