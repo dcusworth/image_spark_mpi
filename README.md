@@ -146,7 +146,7 @@ Architecture       | Odyssey - 8 nodes, 8 threads
 Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/hybrid)  
 Advanced Feature   | Spark - AWS Cluster         | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
 Weak/Strong Scaling| Figures XX - XX             | See report
-Computation Graph  | Model & Data DAG            | [Model](https://github.com/dcusworth/image_spark_mpi/blob/master/model/img/dag_1.png), [Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/img/dag_2.png)
+Computation Graph  | Model & Data DAG            | [Model](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png), [Data](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png)
 
 
 
