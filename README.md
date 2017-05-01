@@ -37,7 +37,7 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
 </figure>
 <br>
 
-\\
+ 
 
 ### Computation Graphs
 The learning algorithm can be translated to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
@@ -46,7 +46,7 @@ The learning algorithm can be translated to a computation graph (Figure 2). The 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="500"/>
 Figure 2: Computation graph for model parallelism.
 
-\\
+ 
 
 *Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo-inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using block-tiling in OpenMP (using Cython).
 
@@ -60,7 +60,7 @@ We can think of parallelism in a data framework as well (Figure 3).
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="600"/>
 Figure 3: Computation graph for data parallelism.
 
-\\
+ 
 
 *Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
 
@@ -98,7 +98,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 <figcaption> Figure XX: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
 </figure>
 <br>
-\\
+ 
 
 *Hybrid OpenMP + MPI - Model Parallelism*
 
@@ -109,7 +109,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
 </figure>
 <br>
-\\
+ 
 
 *Hybrid OpenMP + MPI - Data Parallelism*
 
@@ -120,7 +120,7 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism. </figcaption>
 </figure>
 <br>
-\\
+ 
 
 *Spark parallelization*
  Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
@@ -129,7 +129,7 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="450"/>
 <figcaption> Figure XX: Computation graph for data parallelism. </figcaption>
 </figure>
-\\
+ 
 
 We were only able to run Spark for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
 
