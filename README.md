@@ -49,6 +49,7 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 </figure>
 <br>
 
+
 *Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using block-tiling in OpenMP.
 
 *Spark inner-loop*: We perform the innermost matrix multiplications using Spark by looping over each lambda and label, and treating the pseudo-inverse as an RDD, and multiplying it with X^TY.  
@@ -59,9 +60,10 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 We can think of parallelism in a data framework as well (Figure 3).
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="400"/>
 <figcaption> Figure 3: Computation graph for data parallelism. </figcaption>
 </figure>
+
 
 *Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
 
