@@ -44,6 +44,8 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="500"/>
+Figure 2: Computation graph for model parallelism.
+
 
 
 *Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using block-tiling in OpenMP.
@@ -71,20 +73,20 @@ In all parallel configurations shown below, we achieve 85% prediction accuracy u
 
 We first analyze our code to understand the degree to which the matrix multiplications can be parallelize. The solution to fitting the weights during training is written as
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="300"/>
 
 During testing, we then use these weights to compute
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn9.png" alt="eqn9" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn9.png" alt="eqn9" WIDTH="300"/>
 
 Together, the number of computations is 
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn11.png" alt="eqn11" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn11.png" alt="eqn11" WIDTH="300"/>
 
 
 We note that since  k << d, the Nd^2 term is going to dominate the computation. To see how much our problem can be parallelized, we time how long the parallelizable portion of the code runs, and the time that the code's overhead takes to run. We run on one node, and vary the number of threads from 1 to 16. Thus the time to run on a single node can be written as
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn12.png" alt="eqn12" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn12.png" alt="eqn12" WIDTH="300"/>
 
 The results of running on several cores for 40,000 images are shown below in Figure (XX). As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we achieve maximum OpenMP parallelization betwen 4 and 8 cores.
 
