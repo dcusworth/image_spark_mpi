@@ -17,7 +17,7 @@ Each row of X represents the pixels of an image. Each value of Y is the correspo
 
 Where the pseudo-inverse is definted as 
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="100"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="150"/>
 
 For a multiclass classification of k labels, we need to solve for the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
@@ -33,7 +33,7 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" WIDTH="300"/>
-<figcaption> Figure 1: Datasets used in this study. </figcaption>
+<figcaption> Figure 1: Datasets used in this study - MNIST (left), and our own photographed images (right). </figcaption>
 </figure>
 <br>
 
