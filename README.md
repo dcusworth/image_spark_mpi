@@ -95,43 +95,50 @@ The results of running on several cores for 40,000 images are shown below in Fig
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="500"/>
-<figcaption> Figure 4: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
+<figcaption> Figure 4: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components on the MNIST dataset. </figcaption>
 </figure>
                                                                                                                             
 
 **Hybrid OpenMP + MPI - Model Parallelism**
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure 5) when varying threads and nodes ([Code listing for Model Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure 5) when varying threads and nodes ([Driver for hybrid model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel.py), [OpenMP model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model.pyx)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes. We note that when benchmarking the serial code ([Odyssey serial code](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/fast_serial.py)), the algorithm does not scale directly as a function of increased number of images. The scaling is more of the order of Time(serial) = 0.004 N^1.004 + 5. In other words, the overhead does not scale with number of trained images.
+ 
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
-<figcaption> Figure 5: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
+<figcaption> Figure 5: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism on the MNIST dataset. </figcaption>
 </figure>
 <br />   
                                                                                                                             
 
-We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. Even though the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, the time to compute t_p on 1 node, 1 core is slower for our own dataset (25s compared to 4s for MNIST). Thus we expect the benchmarking to take longer, but also anticipate large performance enhancement from the tiled hybrid parallelization.
+We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5 ([Driver for hybrid model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel_fingers.py), [OpenMP model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model.pyx)). We trained the full set of our own images (16,000 images) serially in 470 seconds, and achieved a prediction accuracy of 87% on the reserved validation set. The MNIST dataset by comparison took 70 seconds to serially train 16,000 images. This is due to the higher pixel resolution of our own images (60x40) compared to the MNIST dataset (28x28). Allocating resources for our larger images was more difficult on Odyssey, so we benchmarked only for a maximum of 4 threads and 4 nodes (Figure 6). Like in the model hybrid setup of the MNIST dataset, we see the best speedup for the maximum number of nodes and threads (4 each). Compared to the MNIST dataset, we see better speedup and efficiency for 4 threads and 4 nodes. We suggest this is because our own images have a higher pixel resolution, so the tiling parallel matrix multiplication gives better speedup.
+
+<figure>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/own_hybrid.png" alt="model_par" WIDTH="700"/>
+<figcaption> Figure 6: Speedup and Efficiency for hybrid model parallelism on our own dataset. </figcaption>
+</figure>
+<br />  
 
 
 **Hybrid OpenMP + MPI - Data Parallelism**
 
-Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes([Code listing for Data Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
+Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure 7) when varying threads and nodes([Driver for hybrid data parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_data_parallel.py), [OpenMP for data parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_data.pyx)). Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="900"/>
-<figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism. </figcaption>
+<figcaption> Figure 7: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism on the MNIST dataset. </figcaption>
 </figure>
 <br />   
                                                                                                                             
 
 **Spark parallelization**
 
-Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
+Figure 8 shows the results for both outer and inner parallelism ([Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([AWS serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
 
  
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="450"/>
-<figcaption> Figure XX: Computation graph for data parallelism. </figcaption>
+<figcaption> Figure 8: Speedup from Spark parallelism on the MNIST dataset run on AWS clusters. </figcaption>
 </figure>
 <br />  
                                                                                                                             
@@ -144,9 +151,9 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 Deliverable        | Our approach                | Link
 -------------------|-----------------------------|--------------
 Architecture       | Odyssey - 8 nodes, 8 threads| See report
-Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/hybrid)  
+Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID)  
 Advanced Feature   | Spark - AWS Cluster         | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
-Weak/Strong Scaling| Figures XX - XX             | See report
+Weak/Strong Scaling| Figures 4 - 8             | See report
 Computation Graph  | Model & Data DAG            | [Model](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png), [Data](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png)
 
 
