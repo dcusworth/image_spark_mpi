@@ -13,17 +13,17 @@ Deep machine learning algorithms (e.g., GoogleNet) have several "layers" where w
 
 Each row of X represents the pixels of an image. Each value of Y is the corresponding label of that image. The solution to the fitted "weights" or coefficients can be solved analytically:
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="250"/>
 
 Where the pseudo-inverse is definted as 
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="100"/>
 
 For a multiclass classification of k labels, we need to solve for the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
 Following Bayes Decision Rule, we arrive at a prediction of being in or outside class k by looking at the sign of the prediction (X*w). We decide the prediction among classes by solving the following:
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn4.png" alt="eqn4" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn4.png" alt="eqn4" WIDTH="500"/>
 
 
  
