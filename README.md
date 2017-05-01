@@ -101,7 +101,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 
 *Hybrid OpenMP + MPI - Model Parallelism*
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes. We also note that from our serial benchmarks, the overhead involved when increasing the number N images does not scale as a function of images, i.e. Time(serial) = 0.004 N^1.004 + 5.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
