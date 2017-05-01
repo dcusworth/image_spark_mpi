@@ -57,7 +57,7 @@ Figure 2: Computation graph for model parallelism.
 
 We can think of parallelism in a data framework as well (Figure 3).
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="500"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="600"/>
 Figure 3: Computation graph for data parallelism.
 
 
@@ -73,11 +73,11 @@ In all parallel configurations shown below, we achieve 85% prediction accuracy u
 
 We first analyze our code to understand the degree to which the matrix multiplications can be parallelize. The solution to fitting the weights during training is written as
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="250"/>
 
 During testing, we then use these weights to compute
 
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn9.png" alt="eqn9" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn9.png" alt="eqn9" WIDTH="100"/>
 
 Together, the number of computations is 
 
@@ -91,7 +91,7 @@ We note that since  k << d, the Nd^2 term is going to dominate the computation. 
 The results of running on several cores for 40,000 images are shown below in Figure (XX). As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we achieve maximum OpenMP parallelization betwen 4 and 8 cores.
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="500"/>
 <figcaption> Figure XX: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
 </figure>
 <br>
@@ -102,7 +102,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes.
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="600"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
 </figure>
 <br>
@@ -112,7 +112,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Like with the model parallel framework, we see maximum speeup for the maximum number of threads and nodes requested. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="300";"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="600"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism. </figcaption>
 </figure>
 <br>
