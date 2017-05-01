@@ -122,7 +122,7 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 We implement a Spark version of our code on an Amazon Web Services (AWS) EMR cluster (m2xlarge) using 1 master and 4 worker cores. Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop implementation matches nicely with the model parallel results of MPI+OpenMP. 
  
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="500"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="450"/>
 <figcaption> Figure XX: Computation graph for data parallelism. </figcaption>
 </figure>
 
@@ -130,8 +130,9 @@ We implement a Spark version of our code on an Amazon Web Services (AWS) EMR clu
 We were only able to run Spark for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
 
 
-### Future work
-We will continue work along three different avenues:
-- Optimize the hybrid parallelization using OpenMP + MPI and do a more rigorous benchmark including running on 8 compute nodes on Odyssey.
-- Optimize the Spark parallelization for AWS (adding Spark to additional loops in the program), implement GPU acceleration, and benchmark for different setups. We will also add visuals illustrating the workflow. 
-- Build a framework where custom images can be imported into the learning algorithm. 
+### Conclusion
+We find that the hybrid data parallel OpenMP + MPI gives us the best performace on the image classification problem. We also see the Spark speedup to give performance between the model and data parallel hybrid algorithms.
+
+The greatest computational bottleneck is in the computation of the pseudo-inverse. We implement a tiled matrix multiplication algorithm in OpenMP to reduce the time it takes to compute the X^TX before finding the inverse. Future work can be done to implement a parallel inverse algorithm, which will greatly improve performace for images that have a larger number of pixels than the MNIST dataset.
+
+Using a simple regularized linear classifier, we find good predictive ability on the MNIST dataset. As the image classes become more difficult to detect (e.g., classifying faces, expressions, etc.), we would need to implement a more classifier, similar to those in use by industry (e.g., AlexNet, GoogleNet, etc.). However, such implementations lose the ability to solve analytically for a solution, and rely on optimization techniques like gradient descent.
