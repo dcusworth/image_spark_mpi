@@ -1,4 +1,4 @@
-# Parallelized Image Recognition in Spark + MPI
+# Parallelized Image Recognition in Spark and MPI+OpenMP
 ## CS205 - Final Report
 ## Tim Clements, Daniel Cusworth, Joannes (Bram) Maasakkers
 
@@ -37,7 +37,7 @@ We also implement a classifier of images we took of our hands (Figure 1), with d
 </figure>
 <br>
 
-
+ 
 
 ### Computation Graphs
 We translate the learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). We implement model parallelism to effeciently solve for each regularization parameter.
@@ -45,8 +45,8 @@ We translate the learning algorithm to a computation graph (Figure 2). The analy
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="500"/>
 Figure 2: Computation graph for model parallelism.
-
-
+<br />  
+ 
 
 *Model Parallelism MPI + OpenMP*: The most resource-intensive computation in the model parallel framework is computing the matrix multiplication X^T * X. The master node computes X^T * X using a block-tiling matrix multiplication routine, with shared memory and threads in OpenMP (Cython prange), then broadcasts the product to all nodes using MPI (Python package mpi4py). We then distribute to each node a subset of lambda values. Within that node, we compute the pseudo-inverse, analytical solution, and classification for each value lambda using OpenMP. The classification step applies weights from the training set to a randomly reserved validation set of images. The master nodes then gathers the validation accuracy from each lambda on all nodes. We then choose the lambda with the higest validation accuracy as the optimal version of the model. 
  
@@ -59,7 +59,8 @@ We can think of parallelism in a data framework as well (Figure 3).
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="600"/>
 Figure 3: Computation graph for data parallelism.
-
+<br />  
+ 
 
 *Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged before making a prediction on the validation set.
 
@@ -96,10 +97,9 @@ The results of running on several cores for 40,000 images are shown below in Fig
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="500"/>
 <figcaption> Figure XX: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
 </figure>
-<br>
+                                                                                                                            
 
-
-*Hybrid OpenMP + MPI - Model Parallelism*
+**Hybrid OpenMP + MPI - Model Parallelism**
 
 Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
 
@@ -107,9 +107,10 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
 </figure>
-<br>
+<br />   
+                                                                                                                            
 
-*Hybrid OpenMP + MPI - Data Parallelism*
+**Hybrid OpenMP + MPI - Data Parallelism**
 
 Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
@@ -117,19 +118,25 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="900"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism. </figcaption>
 </figure>
-<br>
+<br />   
+                                                                                                                            
 
-
-*Spark parallelization*
+**Spark parallelization**
  Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
+
  
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="450"/>
 <figcaption> Figure XX: Computation graph for data parallelism. </figcaption>
 </figure>
-
+<br />  
+                                                                                                                            
 
 We were only able to run Spark for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
+
+
+### Project Deliverables
+
 
 
 ### Conclusions
