@@ -122,6 +122,9 @@ for N in range(1000, 60000, 10000):
             ws = []
             iouts = []
             classes = []
+                
+            #Get denominator - depends on lambda/regularization and not label
+            denom_sum = np.linalg.inv(np.dot(X.T, X) + np.eye(d)*ll)
 
             #Loop over all labels
             for choose_label in range(6): 
