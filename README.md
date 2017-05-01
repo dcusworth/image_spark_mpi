@@ -79,7 +79,7 @@ During testing, we then use these weights to compute
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn9.png" alt="eqn9" WIDTH="100"/>
 
-Together, the number of computations is 
+Together, the number of computations (Cp) can be written as the following (where V is the number of validation images): 
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn11.png" alt="eqn11" WIDTH="300"/>
 
@@ -102,7 +102,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes.
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="600"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
 </figure>
 <br>
@@ -112,7 +112,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Like with the model parallel framework, we see maximum speeup for the maximum number of threads and nodes requested. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="600"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="900"/>
 <figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid data parallelism. </figcaption>
 </figure>
 <br>
@@ -122,7 +122,7 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
 We implement a Spark version of our code on an Amazon Web Services (AWS) EMR cluster (m2xlarge) using 1 master and 4 worker cores. Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop implementation matches nicely with the model parallel results of MPI+OpenMP. 
  
 <figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="300"/>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="500"/>
 <figcaption> Figure XX: Computation graph for data parallelism. </figcaption>
 </figure>
 
