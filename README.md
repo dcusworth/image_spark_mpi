@@ -101,7 +101,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 
 **Hybrid OpenMP + MPI - Model Parallelism**
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes ([Code listing for Model Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
@@ -110,12 +110,12 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <br />   
                                                                                                                             
 
-We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. Even though the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, the time to compute t_p on 1 node, 1 core is slower for our own dataset (25s compared to 4s for MNIST). Thus we expect the benchmarking to take longer, but also anticipate large performance enhancement from hybrid parallelization.
+We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. Even though the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, the time to compute t_p on 1 node, 1 core is slower for our own dataset (25s compared to 4s for MNIST). Thus we expect the benchmarking to take longer, but also anticipate large performance enhancement from the tiled hybrid parallelization.
 
 
 **Hybrid OpenMP + MPI - Data Parallelism**
 
-Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
+Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes([Code listing for Data Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="900"/>
@@ -139,6 +139,14 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 
 
 ### Project Deliverables
+
+Deliverable        | Our approach                | link
+-------------------|-----------------------------|--------------
+Architecture       | Odyssey - 8 nodes, 8 threads
+Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/hybrid)  
+Advanced Feature   | Spark - AWS Cluster         | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
+Weak/Strong Scaling| Figures XX - XX             | See report
+Computation Graph  | Model & Data DAG            | [Model](https://github.com/dcusworth/image_spark_mpi/blob/master/model/img/dag_1.png), [Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/img/dag_2.png)
 
 
 
