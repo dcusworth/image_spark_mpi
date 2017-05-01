@@ -110,7 +110,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <br />   
                                                                                                                             
 
-We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. However, since the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, we expect to see a similar degree of performance boost from parallelization.
+We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. Even though the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, the time to compute t_p on 1 node, 1 core is slower for our own dataset (25s compared to 4s for MNIST). Thus we expect the benchmarking to take longer, but also anticipate large performance enhancement from hybrid parallelization.
 
 
 **Hybrid OpenMP + MPI - Data Parallelism**
