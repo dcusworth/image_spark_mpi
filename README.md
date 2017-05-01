@@ -110,6 +110,9 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <br />   
                                                                                                                             
 
+We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5. From preliminary tests on 1000 images, we could classify with 80% accuracy on the validation set. We also achieved similar similar speedups as in MNIST case, but unfortunately were bottlenecked by Odyssey user "pbenaven," who used all cores on all nodes on seas_iacs the day before the the assignment was due. However, since the pixel sizes between the MNIST dataset (28x28) and our own dataset (60x40) are similar, we expect to see a similar degree of performance boost from parallelization.
+
+
 **Hybrid OpenMP + MPI - Data Parallelism**
 
 Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
