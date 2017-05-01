@@ -2,7 +2,7 @@
 ## CS205 - Final Report
 ## Tim Clements, Daniel Cusworth, Joannes (Bram) Maasakkers
 
-Image recognition is a classic topic in artificial intelligence, which has recently been subject to intense development thanks to computational advances. There exist a variety of multi-layered image recognition algorithms (e.g., AlexNet, GoogleNet) and software (e.g., TensorFlow, Caffe) to classify arbitrary images into categories. These advances have applications in facial recognition, self-driving automobiles, and social media (to name just a few). However, training large batches of images for classification is still a computationally intensive process and the predictive ability of an image recognition framework improves with the number of trained samples.
+Image recognition is a classic topic in artificial intelligence, which has recently been subject to intense development thanks to computational advances. There are a variety of multi-layered image recognition algorithms (e.g., AlexNet, GoogleNet) and software (e.g., TensorFlow, Caffe) to classify arbitrary images into categories. These packages have applications in facial recognition, self-driving automobiles, and social media (to name just a few). However, training large batches of images for classification is still a computationally intensive process and the predictive ability of an image recognition framework improves with the number of trained samples.
 
 Our project is to apply statistical learning theory in the MPI, OpenMP, and Spark frameworks to classify images. We further perform parallal hybridization of OpenMP and MPI. We develop three parallel algorithm frameworks, 1) model parallelism in MPI + OpenMP, 2) data parallelism in MPI + OpenMP, and 3) model parallelism Spark. 
 
@@ -19,7 +19,7 @@ The pseudo-inverse is definted as the following:
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="150"/>
 
-For a multiclass classification of k labels, we need to solve the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
+For a multiclass classification of k labels, we solve the analytical solution for each k class, where each image is classified as "1" when the label equals k, and "-1" otherwise. 
 
 Following the Bayes Decision Rule, we arrive at a prediction of being in or outside class k by looking at the sign of the multiplication (X*w). We decide the best prediction among classes by solving the following:
 
@@ -27,9 +27,9 @@ Following the Bayes Decision Rule, we arrive at a prediction of being in or outs
 
 
  
-We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9) (Figure 1). Each image 28 by 28 pixels and each pixel a grayscale value between 0 and 255 (white to black). We do a 80/20 train test split on our data.
+We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9) (Figure 1). Each image is 28 by 28 pixels and each pixel is a grayscale value between 0 and 255 (white to black). We do a 80%/20% train/test split of our data.
 
-We also implement a classifier of images we took ourselves of hands (Figure 1), which digits of 0-5. 
+We also implement a classifier of images we took of our hands (Figure 1), with digits of 0-5. 
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" WIDTH="300"/>
@@ -40,7 +40,7 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
  
 
 ### Computation Graphs
-The learning algorithm can be translated to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
+We translate the learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). We implement model parallelism to effeciently solve for each regularization parameter.
 
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="500"/>
@@ -48,8 +48,8 @@ Figure 2: Computation graph for model parallelism.
 <br />  
  
 
-*Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo-inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using block-tiling in OpenMP (using Cython).
-
+*Model Parallelism MPI + OpenMP*: The most resource-intensive computation in the model parallel framework is computing the matrix multiplication X^T * X. The master node computes X^T * X using a block-tiling matrix multiplication routine, with shared memory and threads in OpenMP (Cython prange), then broadcasts the product to all nodes using MPI (Python package mpi4py). We then distribute to each node a subset of lambda values. Within that node, we compute the pseudo-inverse, analytical solution, and classification for each value lambda using OpenMP. The classification step applies weights from the training set to a randomly reserved validation set of images. The master nodes then gathers the validation accuracy from each lambda on all nodes. We then choose the lambda with the higest validation accuracy as the optimal version of the model. 
+ 
 *Spark inner-loop*: We perform the innermost matrix multiplications using Spark by looping over each lambda and label, treating the pseudo-inverse as an RDD, and multiplying it with X^TY.  
 
 *Spark outer-loop*: We treat each lambda as an RDD, then send to the workers a lambda and the broadcasted training set. This parallelizes the calculation of the pseudo-inverse. 
@@ -62,7 +62,7 @@ Figure 3: Computation graph for data parallelism.
 <br />  
  
 
-*Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
+*Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged before making a prediction on the validation set.
 
 We run our hybrid MPI-OpenMP code on the RC Odyssey cluster. RC Odyssey is large-scale, heterogeneous computing facility run at two locations in Boston, MA and one in Holyoke, MA. RC Odyssey has over 65,000 cores, 260 TB of RAM and over 1,000,000 CUDA cores. We use the seas_iacs partition of Odyssey. Each node on the seas_iacs partition has 4 sockets, with 8 cores per socket and 2 threads per core, for a total of 64 CPUs/nodes. The CPUs are x86_64 AMD Opteron 6376 Processors, each of which runs at 2300 MHz and has 4 Gb of RAM.
 
@@ -87,7 +87,7 @@ Together, the number of computations (Cp) can be written as the following (where
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn11.png" alt="eqn11" WIDTH="300"/>
 
 
-We note that since  k << d, the Nd^2 term is going to dominate the computation. To see how much our problem can be parallelized, we time how long the parallelizable portion of the code runs, and the time that the code's overhead takes to run. We run on one node, and vary the number of threads from 1 to 8. Thus the time to run on a single node can be written as the following:
+We note that since  k << d, the Nd^2 term is going to dominate the computation. To see how much our problem can be parallelized, we time how long the parallelizable portion of the code runs, and the code's overhead time. We run on one node, and vary the number of threads from 1 to 8. Thus, the time to run on a single node can be written as the following:
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn12.png" alt="eqn12" WIDTH="300"/>
 
@@ -101,7 +101,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 
 **Hybrid OpenMP + MPI - Model Parallelism**
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the threads and nodes, but the scaled speedup is still largest number of threads and nodes. We also note that from our serial benchmarks, the overhead involved when increasing the number N images does not scale as a function of images, i.e. Time(serial) = 0.004 N^1.004 + 5.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes. We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
@@ -112,7 +112,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 
 **Hybrid OpenMP + MPI - Data Parallelism**
 
-Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Like with the model parallel framework, we see maximum speeup for the maximum number of threads and nodes requested. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
+Using the data parallel framework described above (OpenMP on matrix multiplications, MPI on subsets of the images), we achieve the following results (Figure XX) when varying threads and nodes. Similar to the model parallel framework, we see maximum speeup for the maximum number of threads and nodes. However, the speedups are much larger in the data parallel framework than the model parallel framework (25x versus 4x, respectively). We also see much better efficiency in the data parallel approach, where the efficiency remains near optimal for many thread, node configurations.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data_hybrid.png" alt="data_par" WIDTH="900"/>
@@ -122,7 +122,8 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
                                                                                                                             
 
 **Spark parallelization**
- Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNSIT dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
+ Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
+
  
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/spark_speedup.png" alt="spark" WIDTH="450"/>
@@ -139,8 +140,8 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 
 
 ### Conclusions
-We find that the hybrid data parallel OpenMP + MPI gives us the best performace on the image classification problem. We also see the Spark speedup to give performance between the model and data parallel hybrid algorithms.
+We find that the hybrid data parallel OpenMP + MPI gives us the best performace on the image classification problem. Spark gives performance between that of the model and data parallel hybrid algorithms.
 
-The greatest computational bottleneck is in the computation of the pseudo-inverse. We implement a tiled matrix multiplication algorithm in OpenMP to reduce the time it takes to compute the X^TX before finding the inverse. Future work can be done to implement a parallel inverse algorithm, which will greatly improve performace for images that have a larger number of pixels than the MNIST dataset.
+The greatest computational bottleneck is in the computation of the pseudo-inverse. We implement a tiled matrix multiplication algorithm in OpenMP to reduce the time it takes to compute the X^T * X before finding the inverse. Future work can be done to implement a hybrid (MPI + OpenMP) inverse algorithm, which will greatly improve performace for images that have a larger number of pixels than the MNIST dataset.
 
-Using a simple regularized linear classifier, we find good predictive ability on the MNIST dataset. As the image classes become more difficult to detect (e.g., classifying faces, expressions, etc.), we would need to implement a more classifier, similar to those in use by industry (e.g., AlexNet, GoogleNet, etc.). However, such implementations lose the ability to solve analytically for a solution, and rely on optimization techniques like gradient descent.
+Using a simple regularized linear classifier, we obtain good predictive ability on the MNIST dataset. If the future, if we were to use more complicated images (e.g., classifying faces, expressions, etc.), we would need to implement a more sophisticated classifier, similar to those in use by industry (e.g., AlexNet, GoogleNet, etc.). However, such implementations lose the ability to solve analytically for a solution, and rely on optimization techniques like gradient descent.
