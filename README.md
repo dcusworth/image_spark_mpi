@@ -91,21 +91,21 @@ We note that since  k << d, the Nd^2 term is going to dominate the computation. 
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn12.png" alt="eqn12" WIDTH="300"/>
 
-The results of running on several cores for 40,000 images are shown below in Figure (XX). As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we achieve maximum OpenMP parallelization betwen 4 and 8 cores.
+The results of running on several cores for 40,000 images are shown below in Figure 4. As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we achieve maximum OpenMP parallelization betwen 4 and 8 cores.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="500"/>
-<figcaption> Figure XX: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
+<figcaption> Figure 4: Parallel speedup on a single node varying threads, broken in overhead and parallelizable components. </figcaption>
 </figure>
                                                                                                                             
 
 **Hybrid OpenMP + MPI - Model Parallelism**
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure XX) when varying threads and nodes ([Code listing for Model Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure 5) when varying threads and nodes ([Code listing for Model Parallelism](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/model_hybrid.png" alt="model_par" WIDTH="900"/>
-<figcaption> Figure XX: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
+<figcaption> Figure 5: Speedup, Scaled Speedup, and Efficiency for hybrid model parallelism. </figcaption>
 </figure>
 <br />   
                                                                                                                             
@@ -125,7 +125,8 @@ Using the data parallel framework described above (OpenMP on matrix multiplicati
                                                                                                                             
 
 **Spark parallelization**
- Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
+
+Figure XX shows the results for both outer and inner parallelism ([Code listing for Spark-outer](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_outer.py)) ([Code listing for Spark-inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_spark_inner.py)) ([Code listing for serial implementation](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS/aws_serial.py)). We see around 7x speedup for the outer loop Spark implementation. The inner loop implementation runs nearly the same as the serial code. We hypothesize that this is due to the fact that the MNIST dataset's pixel dimension is low, meaning that the parallelization from just inner-most matrix multiplication provides little speedup over the serial version. However, the outer-loop speedup fits between the model and data parallel results of MPI+OpenMP. 
 
  
 <figure>
@@ -142,7 +143,7 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 
 Deliverable        | Our approach                | Link
 -------------------|-----------------------------|--------------
-Architecture       | Odyssey - 8 nodes, 8 threads
+Architecture       | Odyssey - 8 nodes, 8 threads| See report
 Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/hybrid)  
 Advanced Feature   | Spark - AWS Cluster         | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
 Weak/Strong Scaling| Figures XX - XX             | See report
