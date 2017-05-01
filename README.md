@@ -140,7 +140,7 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 
 ### Project Deliverables
 
-Deliverable        | Our approach                | link
+Deliverable        | Our approach                | Link
 -------------------|-----------------------------|--------------
 Architecture       | Odyssey - 8 nodes, 8 threads
 Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/hybrid)  
