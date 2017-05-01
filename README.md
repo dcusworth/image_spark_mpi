@@ -43,11 +43,7 @@ We also implement a classifier of images we took ourselves of hands (Figure 1), 
 We translate our learning algorithm to a computation graph (Figure 2). The analytical solution requires solving l pseudo-inverses for the length of the regularization (i.e., lambda grid). This presents us with an opportunity to perform model parallelism.
 
 
-<figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png" alt="dag1" WIDTH="500"/>
-<figcaption> Figure 2: Computation graph for model parallelism. </figcaption>
-</figure>
-<br>
 
 
 *Model Parallelism MPI + OpenMP*: We assign to each node a value of lambda, and have it compute the pseudo inverse, analytical solution, and classification for that value of each lambda. The MPI (Python package mpi4py) then communicates across nodes to see which lambda gives the best accuracy on a randomly reserved validation set of images and chooses that lambda as the optimal version of the model. We further parallelize the matrix multiplications in the analytical solution using block-tiling in OpenMP.
@@ -59,10 +55,8 @@ We translate our learning algorithm to a computation graph (Figure 2). The analy
 
 We can think of parallelism in a data framework as well (Figure 3).
 
-<figure>
-<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="400"/>
-<figcaption> Figure 3: Computation graph for data parallelism. </figcaption>
-</figure>
+<img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png" alt="dag2" WIDTH="500"/>
+Figure 3: Computation graph for data parallelism.
 
 
 *Data Parallelism MPI + OpenMPI*. We compute the computation graph as in Figure 2, but for a subset of the data, which are sent to MPI nodes. After each node estimates the weights on that subset, the weights are brought together and averaged becfore making a prediction on the validation set.
