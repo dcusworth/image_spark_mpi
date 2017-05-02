@@ -9,11 +9,11 @@ import matplotlib.image as mpimg
 import scipy.interpolate
 import glob
 
-import train_openmp_model
+import train_openmp_model_own
 
 """ Model parallel image recogntion benchmark for finger image data set.
 
-Uses MPI and OpenMP hybrid parallelism. Calls train_openmp_model.pyx Cython 
+Uses MPI and OpenMP hybrid parallelism. Calls train_openmp_model_own.pyx Cython 
 subroutine. Downsamples .png images into more mangeable size to fit images 
 into memory. 
 
@@ -139,7 +139,7 @@ if rank == 0:
 	start = time.time()
 	x_T = Xtr.T
 	start_tp = time.time()
-	denom_noninv = train_openmp_model.matmat_multi_tile(x_T.astype(np.float64),Xtr.astype(np.float64),nthreads) 
+	denom_noninv = train_openmp_model_own.matmat_multi_tile(x_T.astype(np.float64),Xtr.astype(np.float64),nthreads) 
 	tp = time.time() - start_tp
 else:
 	denom_noninv = None
@@ -151,7 +151,7 @@ denom_noninv = comm.bcast(denom_noninv,root = 0)
 start_train = time.time()
 for ll in lambdas:
 	#### CALL cython implementation ####
-	vacc, preds = train_openmp_model.train(Xtr, Xvl,denom_noninv,y_tr, y_val,ll,nthreads)
+	vacc, preds = train_openmp_model_own.train(Xtr, Xvl,denom_noninv,y_tr, y_val,ll,nthreads)
 	#### END cython implementation ####
 t_mpi = time.time() - start_train
 

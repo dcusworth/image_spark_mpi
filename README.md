@@ -15,7 +15,7 @@ Each row of X represents the pixels of an image. Each value of Y is the correspo
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn2.png" alt="eqn2" WIDTH="250"/>
 
-The pseudo-inverse is definted as the following:
+The pseudo-inverse is defined as the following:
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn3.png" alt="eqn3" WIDTH="150"/>
 
@@ -29,7 +29,7 @@ Following the Bayes Decision Rule, we arrive at a prediction of being in or outs
  
 We train our classifier on the commonly used MNIST database [(LeCun et al. 1998)](http://yann.lecun.com/exdb/mnist/) that consists handwritten digits (0-9) (Figure 1). Each image is 28 by 28 pixels and each pixel is a grayscale value between 0 and 255 (white to black). We do a 80%/20% train/test split of our data.
 
-We also implement a classifier of images we took of our hands (Figure 1), with digits of 0-5. 
+We also implement a classifier of images we took of our hands (Figure 1), with digits of 0-5. We filmed different test subjects in a studio setup and exported the individual frames of these movies to images of dimension 60 x 40 in black and white.  
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/data.png" alt="data" WIDTH="300"/>
@@ -101,7 +101,7 @@ The results of running on several cores for 40,000 images are shown below in Fig
 
 **Hybrid OpenMP + MPI - Model Parallelism**
 
-Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure 5) when varying threads and nodes ([Driver for hybrid model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel.py), [OpenMP model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model.pyx)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes. We note that when benchmarking the serial code ([Odyssey serial code](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/fast_serial.py)), the algorithm does not scale directly as a function of increased number of images. The scaling is more of the order of Time(serial) = 0.004 N^1.004 + 5. In other words, the overhead does not scale with number of trained images.
+Using the model parallel framework described above (OpenMP on matrix multiplications, MPI on lambdas), we achieve the following results (Figure 5) when varying threads and nodes ([Driver for hybrid model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel.py), [OpenMP model parallelism - MNIST](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model.pyx)). We see the maximum speedup occuring with the maximum number of nodes and threads (8 each). The efficiency drops as we increase the number of threads and nodes, but the scaled speedup is still largest for the highest number of threads and nodes. We note that when benchmarking the serial code ([Odyssey serial code](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/fast_serial.py)), the algorithm does not scale directly as a function of increased number of images. The scaling is more of the order of Time(serial) = 0.004 N^1.004 + 5. In other words, the overhead does not scale with number of trained images. For some number of nodes, the MPI efficiency is limited as we parallelize over 10 lambdas, some nodes may idle near the end when the number of nodes is not a factor of the number of lambdas.
  
 
 <figure>
@@ -111,7 +111,7 @@ Using the model parallel framework described above (OpenMP on matrix multiplicat
 <br />   
                                                                                                                             
 
-We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5 ([Driver for hybrid model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel_fingers.py), [OpenMP model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model.pyx)). We trained the full set of our own images (16,000 images) serially in 470 seconds, and achieved a prediction accuracy of 87% on the reserved validation set. The MNIST dataset by comparison took 70 seconds to serially train 16,000 images. This is due to the higher pixel resolution of our own images (60x40) compared to the MNIST dataset (28x28). Allocating resources for our larger images was more difficult on Odyssey, so we benchmarked only for a maximum of 4 threads and 4 nodes (Figure 6). Like in the model hybrid setup of the MNIST dataset, we see the best speedup for the maximum number of nodes and threads (4 each). Compared to the MNIST dataset, we see better speedup and efficiency for 4 threads and 4 nodes. We suggest this is because our own images have a higher pixel resolution, so the tiling parallel matrix multiplication gives better speedup.
+We also ran model parallelism on the dataset of our own images - pictures of hands labelled from 0-5 ([Driver for hybrid model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/benchmark_model_parallel_fingers.py), [OpenMP model parallelism - own images](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID/train_openmp_model_own.pyx)). We trained the full set of our own images (16,000 images) serially in 470 seconds, and achieved a prediction accuracy of 87% on the reserved validation set. The MNIST dataset by comparison took 70 seconds to serially train 16,000 images. This is due to the higher pixel resolution of our own images (60x40) compared to the MNIST dataset (28x28). We benchmark our algorithm for 3,000 images varying both nodes and threads between 1 and 8. We see a maximum speedup of 6 by using 8 nodes with 8 cores. Compared to the MNIST dataset, we see better speedup and efficiency. This is caused by the higher pixel resolution of the images, leading to a larger speedup related to the tiling parallel matrix multiplication. 
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/own_hybrid.png" alt="model_par" WIDTH="700"/>
@@ -150,7 +150,7 @@ We were only able to run Spark for 20,000 images in the MNIST dataset, as the ou
 
 Deliverable        | Our approach                | Link
 -------------------|-----------------------------|--------------
-Architecture       | Odyssey - 8 nodes, 8 threads| See report
+Architecture       | Odyssey - 8 nodes, 8 threads; AWS - 1 master, 4 workers | See report
 Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID)  
 Advanced Feature   | Spark - AWS Cluster         | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
 Weak/Strong Scaling| Figures 4 - 8             | See report
