@@ -91,7 +91,7 @@ We note that since  k << d, the Nd^2 term is going to dominate the computation. 
 
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/eqn12.png" alt="eqn12" WIDTH="300"/>
 
-The results of running on several cores for 40,000 images are shown below in Figure 4. As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we achieve maximum OpenMP parallelization betwen 4 and 8 cores.
+The results of running on several cores for 40,000 images are shown below in Figure 4. As more threads are added, the parallel component of the algorithm speeds up until reaching 8 cores, at which it stabalizes. The overhead component begins to slightly increase as threads are added, indicating the increased communication that comes with adding more processors. These results show up that for a problem size of 40,000 images, we approach maximum OpenMP parallelization around 8 cores.
 
 <figure>
 <img src="https://github.com/dcusworth/image_spark_mpi/blob/master/img/amdahl.png" alt="amdahl" WIDTH="500"/>
