@@ -1,5 +1,4 @@
 # Parallelized Image Recognition in Spark and MPI+OpenMP
-## CS205 - Final Report
 ## Tim Clements, Daniel Cusworth, Joannes (Bram) Maasakkers
 
 Image recognition is a classic topic in artificial intelligence, which has recently been subject to intense development thanks to computational advances. There are a variety of multi-layered image recognition algorithms (e.g., AlexNet, GoogleNet) and software (e.g., TensorFlow, Caffe) to classify arbitrary images into categories. These packages have applications in facial recognition, self-driving automobiles, and social media (to name just a few). However, training large batches of images for classification is still a computationally intensive process and the predictive ability of an image recognition framework improves with the number of trained samples.
@@ -143,18 +142,7 @@ Figure 8 shows the results for both outer and inner parallelism ([Spark-outer](h
 <br />  
                                                                                                                             
 
-We were only able to run Spark for 20,000 images in the MNIST dataset, as the outer loop Spark code ran out of memory. 
-
-
-### Project Deliverables
-
-Deliverable        | Our approach                | Link
--------------------|-----------------------------|--------------
-Architecture       | Odyssey - 8 nodes, 8 threads; AWS - 1 master, 4 workers | See report
-Hybrid Parallelism | OpenMP + MPI                | [Model + Data](https://github.com/dcusworth/image_spark_mpi/blob/master/model/HYBRID)  
-Advanced Feature   | Spark - AWS Cluster , Own image dataset        | [Outer + Inner](https://github.com/dcusworth/image_spark_mpi/blob/master/model/AWS)
-Weak/Strong Scaling| Figures 4 - 8             | See report
-Computation Graph  | Model & Data DAG            | [Model](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_1.png), [Data](https://github.com/dcusworth/image_spark_mpi/blob/master/img/dag_2.png)
+We were only able to run Spark for 20,000 images in the MNIST dataset, as the outer loop Spark code ran into memory issues. 
 
 
 
